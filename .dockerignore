@@ -1,0 +1,10 @@
+*.md
+.git
+.gitignore
+.env.local
+coverage/
+bin/
+*.test
+*.log
+test/
+
