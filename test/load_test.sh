@@ -9,8 +9,9 @@ BASE_URL="http://localhost:8080/test"
 
 echo "Test 1: IP Rate Limiting (should allow 5, then block)"
 echo "------------------------------------------------------"
+TEST_IP="192.168.1.100"
 for i in {1..7}; do
-  RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" $BASE_URL)
+  RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -H "X-Forwarded-For: $TEST_IP" $BASE_URL)
   echo "Request $i: HTTP $RESPONSE"
   
   if [ $i -le 5 ]; then
@@ -32,7 +33,7 @@ done
 echo ""
 echo "Test 2: Token Rate Limiting (should allow 10, then block)"
 echo "--------------------------------------------------------"
-TOKEN="test-token-abc123"
+TOKEN="test-token-$(date +%s)"
 for i in {1..12}; do
   RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -H "API_KEY: $TOKEN" $BASE_URL)
   echo "Request $i: HTTP $RESPONSE"
@@ -56,7 +57,7 @@ done
 echo ""
 echo "Test 3: Different IPs (should not interfere)"
 echo "-------------------------------------------"
-RESPONSE1=$(curl -s -o /dev/null -w "%{http_code}" $BASE_URL)
+RESPONSE1=$(curl -s -o /dev/null -w "%{http_code}" -H "X-Forwarded-For: 10.0.0.1" $BASE_URL)
 echo "IP 1 - Request 1: HTTP $RESPONSE1"
 
 RESPONSE2=$(curl -s -o /dev/null -w "%{http_code}" -H "X-Forwarded-For: 10.0.0.2" $BASE_URL)

@@ -27,6 +27,12 @@ func NewRateLimiterMiddleware(limiter *usecase.RateLimiter) *RateLimiterMiddlewa
 
 func (m *RateLimiterMiddleware) Handle(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Bypass rate limiting for health checks
+		if r.URL.Path == "/health" {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		ctx := context.Background()
 
 		token := r.Header.Get(HeaderAPIKey)
